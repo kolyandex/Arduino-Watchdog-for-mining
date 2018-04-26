@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
@@ -33,14 +34,22 @@ namespace Watchdog
 
         void FindDevice()
         {
-            var ports = SerialPort.GetPortNames();
-            foreach (var port in ports)
+            try
             {
-                if (CheckDevice(port))
+                var ports = SerialPort.GetPortNames();
+                foreach (var port in ports)
                 {
-                    InfoLabel.Text = "Watchdog found on " + _serialPort.PortName;
-                    return;
+                    _serialPort?.Close();
+                    if (CheckDevice(port))
+                    {
+                        InfoLabel.Text = "Watchdog found on " + _serialPort.PortName;
+                        return;
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                
             }
 
         }
@@ -48,11 +57,12 @@ namespace Watchdog
         bool CheckDevice(string portname)
         {
             _serialPort = new SerialPort(portname, 9600);
-
             try
             {
+                _serialPort.ReadTimeout = 2000;
                 _serialPort.Open();
                 _serialPort.WriteLine("who_are_you?");
+                
                 if (_serialPort.ReadLine().Trim() != "watchdog")
                 {
                     _serialPort.Close();
@@ -65,7 +75,7 @@ namespace Watchdog
             }
             catch (Exception e)
             {
-
+               //MessageBox.Show(e.Message);
             }
             return false;
         }
