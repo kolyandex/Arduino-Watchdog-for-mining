@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
@@ -32,36 +33,29 @@ namespace Watchdog
             FindDevice();
         }
 
-        void FindDevice()
+        private void FindDevice()
         {
             InfoLabel.Text = "Looking for watchdog O_O";
-            try
-            {
-                var ports = SerialPort.GetPortNames();
-                foreach (var port in ports)
-                {
-                    _serialPort?.Close();
-                    CheckDevice(port);
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Instance.Log(e.Message);
-            }
 
+            var ports = SerialPort.GetPortNames();
+            foreach (var port in ports)
+            {
+                _serialPort?.Close();
+                CheckDevice(port);
+            }
         }
 
-        private async void CheckDevice(string portname)
+        private void CheckDevice(string portname)
         {
             _serialPort = new SerialPort(portname, 9600);
             try
             {
-                _serialPort.ReadTimeout = 200;
+                if (_serialPort.IsOpen) return;
+                _serialPort.ReadTimeout = 100;
                 _serialPort.Open();
                 _serialPort.WriteLine("who_are_you?");
-                var str = await ReadComTask();
-                
-                if (str.Trim() != "watchdog")
+
+                if (_serialPort.ReadLine().Trim() != "watchdog")
                 {
                     _serialPort.Close();
                     _serialPort.Dispose();
@@ -73,30 +67,17 @@ namespace Watchdog
             }
             catch (Exception e)
             {
-                Logger.Instance.Log(e.Message);
+                if (!_deviceExist) _serialPort.Close();
+                Logger.Instance.Log(portname + " " + e.Message);
             }
         }
-        private async Task<string> ReadComTask()
-        {
-            return await Task.Run(() =>
-            {
-                try
-                {
-                    return _serialPort.ReadLine();
-                }
-                catch (Exception e)
-                {
-                    Logger.Instance.Log(e.Message);
-                    return string.Empty;
-                }
-                
-            });
-        }
+
 
         private void DeviceDisconnected()
         {
-            _deviceExist = false;
             _serialPort.Close();
+            _deviceExist = false;
+            radioButton2.Checked = false;
             InfoLabel.Text = "Watchdog disconnected";
         }
 
