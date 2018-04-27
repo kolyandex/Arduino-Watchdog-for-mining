@@ -53,14 +53,20 @@
             // radioButton2
             // 
             this.radioButton2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.radioButton2.AutoSize = true;
-            this.radioButton2.Checked = true;
-            this.radioButton2.Location = new System.Drawing.Point(252, 12);
+            this.radioButton2.Appearance = System.Windows.Forms.Appearance.Button;
+            this.radioButton2.AutoCheck = false;
+            this.radioButton2.BackColor = System.Drawing.SystemColors.Control;
+            this.radioButton2.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.radioButton2.FlatAppearance.CheckedBackColor = System.Drawing.Color.Lime;
+            this.radioButton2.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
+            this.radioButton2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.radioButton2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.radioButton2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            this.radioButton2.Location = new System.Drawing.Point(264, 6);
             this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(14, 13);
+            this.radioButton2.Size = new System.Drawing.Size(16, 16);
             this.radioButton2.TabIndex = 5;
-            this.radioButton2.TabStop = true;
-            this.radioButton2.UseVisualStyleBackColor = true;
+            this.radioButton2.UseVisualStyleBackColor = false;
             // 
             // AutorunCheckBox
             // 
@@ -77,7 +83,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(278, 73);
+            this.ClientSize = new System.Drawing.Size(292, 74);
             this.Controls.Add(this.AutorunCheckBox);
             this.Controls.Add(this.radioButton2);
             this.Controls.Add(this.InfoLabel);

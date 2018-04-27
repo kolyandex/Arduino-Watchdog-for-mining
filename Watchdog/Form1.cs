@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
@@ -34,53 +34,66 @@ namespace Watchdog
 
         void FindDevice()
         {
+            InfoLabel.Text = "Looking for watchdog O_O";
             try
             {
                 var ports = SerialPort.GetPortNames();
                 foreach (var port in ports)
                 {
                     _serialPort?.Close();
-                    if (CheckDevice(port))
-                    {
-                        InfoLabel.Text = "Watchdog found on " + _serialPort.PortName;
-                        return;
-                    }
+                    CheckDevice(port);
                 }
             }
             catch (Exception e)
             {
-                
+                Logger.Instance.Log(e.Message);
             }
 
         }
 
-        bool CheckDevice(string portname)
+        private async void CheckDevice(string portname)
         {
             _serialPort = new SerialPort(portname, 9600);
             try
             {
-                _serialPort.ReadTimeout = 2000;
+                _serialPort.ReadTimeout = 200;
                 _serialPort.Open();
                 _serialPort.WriteLine("who_are_you?");
+                var str = await ReadComTask();
                 
-                if (_serialPort.ReadLine().Trim() != "watchdog")
+                if (str.Trim() != "watchdog")
                 {
                     _serialPort.Close();
-                    return false;
+                    _serialPort.Dispose();
+                    return;
                 }
-
+                InfoLabel.Text = "Watchdog found on " + _serialPort.PortName;
                 _serialPort.DataReceived += SerialDataReceived;
                 _deviceExist = true;
-                return true;
             }
             catch (Exception e)
             {
-               //MessageBox.Show(e.Message);
+                Logger.Instance.Log(e.Message);
             }
-            return false;
+        }
+        private async Task<string> ReadComTask()
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    return _serialPort.ReadLine();
+                }
+                catch (Exception e)
+                {
+                    Logger.Instance.Log(e.Message);
+                    return string.Empty;
+                }
+                
+            });
         }
 
-        void DeviceDisconnected()
+        private void DeviceDisconnected()
         {
             _deviceExist = false;
             _serialPort.Close();
@@ -89,16 +102,18 @@ namespace Watchdog
 
         private void SerialTimer_Tick(object sender, EventArgs e)
         {
-            if (_deviceExist && !_serialPort.IsOpen)
+            try
             {
-                DeviceDisconnected();
+                if (_deviceExist)
+                {
+                    if (_serialPort.IsOpen) _serialPort.WriteLine("im_fine");
+                    else DeviceDisconnected();
+                }
+                else FindDevice();
             }
-
-            if (!_deviceExist) FindDevice();
-
-            if (_deviceExist && _serialPort.IsOpen)
+            catch (Exception exception)
             {
-                _serialPort.WriteLine("im_fine");
+                Logger.Instance.Log(exception.Message);
             }
         }
 
