@@ -33,7 +33,7 @@ void loop()
   {
     if (inputString == "who_are_you?\n") Serial.println("watchdog");
 
-    if (inputString == "im_fine\n" && (state == Booting || state == Active))
+    if (inputString == "im_fine\n")
     {
       Serial.println("glad_for_you");
       state = Active;
